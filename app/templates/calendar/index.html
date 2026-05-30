@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Calendário - TimeCash{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📅 Calendário</h1>
+    <a href="{{ url_for('events.create') }}" class="btn btn-primary">+ Novo Evento</a>
+</div>
+
+<!-- Resumo financeiro do mês -->
+<div class="summary-cards">
+    <div class="summary-card card-dark">
+        <span class="summary-label">Futuros pagamentos</span>
+        <span class="summary-value">R$ {{ "%.2f"|format(total_futuros) }}</span>
+    </div>
+    <div class="summary-card card-dark">
+        <span class="summary-label">Saldo disponível</span>
+        <span class="summary-value">R$ {{ "%.2f"|format(total_entradas - total_saidas) }}</span>
+    </div>
+</div>
+
+<!-- Navegação do calendário -->
+<div class="calendar-nav">
+    <a href="{{ url_for('calendar.index', mes=mes-1, ano=ano) }}" class="btn btn-ghost">← Anterior</a>
+    <h2 class="month-title">{{ month_name }} {{ ano }}</h2>
+    <a href="{{ url_for('calendar.index', mes=mes+1, ano=ano) }}" class="btn btn-ghost">Próximo →</a>
+</div>
+
+<!-- Grid do calendário -->
+<div class="calendar-container">
+    <div class="calendar-grid">
+        <div class="cal-header">Dom</div>
+        <div class="cal-header">Seg</div>
+        <div class="cal-header">Ter</div>
+        <div class="cal-header">Qua</div>
+        <div class="cal-header">Qui</div>
+        <div class="cal-header">Sex</div>
+        <div class="cal-header">Sáb</div>
+
+        {% for week in month_calendar %}
+            {% for day in week %}
+                <div class="cal-day {% if day == 0 %}cal-empty{% endif %} {% if day == hoje.day and mes == hoje.month and ano == hoje.year %}cal-today{% endif %}">
+                    {% if day != 0 %}
+                        <span class="day-number">{{ day }}</span>
+                        {% if day in events_by_day %}
+                            {% for event in events_by_day[day][:2] %}
+                                <a href="{{ url_for('events.edit', event_id=event.id) }}" class="cal-event cat-{{ event.category|lower }}">
+                                    {{ event.title[:15] }}{% if event.title|length > 15 %}…{% endif %}
+                                </a>
+                            {% endfor %}
+                            {% if events_by_day[day]|length > 2 %}
+                                <span class="cal-more">+{{ events_by_day[day]|length - 2 }} mais</span>
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <!-- Eventos do mês (lateral) -->
+    <div class="side-events">
+        <h3>Eventos do mês</h3>
+        {% set all_events = events_by_day.values()|sum(start=[]) %}
+        {% if all_events %}
+            {% for day, evs in events_by_day.items() %}
+                {% for event in evs %}
+                    <div class="side-event-card cat-bg-{{ event.category|lower }}">
+                        <div class="side-event-date">{{ '%02d'|format(day) }}/{{ '%02d'|format(mes) }}/{{ ano }}</div>
+                        <div class="side-event-title">{{ event.title }}</div>
+                        {% if event.finances %}
+                            <div class="side-event-value">
+                                {% set total = event.total_gastos %}
+                                {% if total > 0 %}R$ {{ "%.2f"|format(total) }}{% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        {% else %}
+            <p class="empty-msg">Nenhum evento este mês.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

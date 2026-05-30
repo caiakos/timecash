@@ -1,0 +1,13 @@
+// TimeCash - JS principal
+
+// Fechar flash messages após 4 segundos
+document.addEventListener('DOMContentLoaded', function () {
+    const flashes = document.querySelectorAll('.flash');
+    flashes.forEach(function (flash) {
+        setTimeout(function () {
+            flash.style.transition = 'opacity 0.5s';
+            flash.style.opacity = '0';
+            setTimeout(function () { flash.remove(); }, 500);
+        }, 4000);
+    });
+});

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Finanças - TimeCash{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>💰 Finanças</h1>
+    <a href="{{ url_for('finances.create') }}" class="btn btn-primary">+ Nova Transação</a>
+</div>
+
+<!-- Cards de resumo -->
+<div class="summary-cards">
+    <div class="summary-card card-dark">
+        <span class="summary-label">Futuros pagamentos</span>
+        <span class="summary-value">R$ {{ "%.2f"|format(futuros) }}</span>
+    </div>
+    <div class="summary-card card-dark">
+        <span class="summary-label">Saldo disponível</span>
+        <span class="summary-value">R$ {{ "%.2f"|format(saldo) }}</span>
+    </div>
+</div>
+
+<!-- Listas de entradas e saídas -->
+<div class="finance-lists">
+    <div class="finance-col saidas-col">
+        <h3>Saídas</h3>
+        {% set saidas = finances | selectattr('type', 'equalto', 'saida') | list %}
+        {% if saidas %}
+            {% for f in saidas %}
+                <div class="finance-item finance-saida">
+                    <span class="fi-value">R$ {{ "%.2f"|format(f.amount) }}</span>
+                    <span class="fi-date">{{ f.date.strftime('%d/%m/%Y') }}</span>
+                    <span class="fi-desc">{{ f.description }}</span>
+                    <form method="POST" action="{{ url_for('finances.delete', finance_id=f.id) }}" style="display:inline" onsubmit="return confirm('Excluir?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <button type="submit" class="btn-icon">🗑</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-msg">Sem saídas registradas.</p>
+        {% endif %}
+    </div>
+
+    <div class="finance-col entradas-col">
+        <h3>Entradas</h3>
+        {% set entradas = finances | selectattr('type', 'equalto', 'entrada') | list %}
+        {% if entradas %}
+            {% for f in entradas %}
+                <div class="finance-item finance-entrada">
+                    <span class="fi-value">R$ {{ "%.2f"|format(f.amount) }}</span>
+                    <span class="fi-date">{{ f.date.strftime('%d/%m/%Y') }}</span>
+                    <span class="fi-desc">{{ f.description }}</span>
+                    <form method="POST" action="{{ url_for('finances.delete', finance_id=f.id) }}" style="display:inline" onsubmit="return confirm('Excluir?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <button type="submit" class="btn-icon">🗑</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-msg">Sem entradas registradas.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

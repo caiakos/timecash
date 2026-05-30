@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Eventos - TimeCash{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>🗓 Eventos</h1>
+    <a href="{{ url_for('events.create') }}" class="btn btn-primary">+ Novo Evento</a>
+</div>
+
+<div class="events-layout">
+    <!-- Tabela de eventos -->
+    <div class="events-table-wrapper">
+        {% if events %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Evento</th>
+                    <th>Categoria</th>
+                    <th>Data</th>
+                    <th>Local</th>
+                    <th>Gastos</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>
+                        <strong>{{ event.title }}</strong>
+                        {% if event.description %}
+                            <br><small class="text-muted">{{ event.description[:50] }}{% if event.description|length > 50 %}…{% endif %}</small>
+                        {% endif %}
+                    </td>
+                    <td><span class="badge badge-{{ event.category|lower }}">{{ event.category }}</span></td>
+                    <td>{{ event.date.strftime('%d/%m/%Y') }}{% if event.time %}<br><small>{{ event.time.strftime('%H:%M') }}</small>{% endif %}</td>
+                    <td>{{ event.location or '—' }}</td>
+                    <td>
+                        {% if event.total_gastos > 0 %}
+                            <span class="value-saida">- R$ {{ "%.2f"|format(event.total_gastos) }}</span>
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="actions">
+                        <a href="{{ url_for('events.edit', event_id=event.id) }}" class="btn btn-sm btn-ghost">✏️</a>
+                        <form method="POST" action="{{ url_for('events.delete', event_id=event.id) }}" style="display:inline" onsubmit="return confirm('Excluir este evento?')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="btn btn-sm btn-danger">🗑</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <div class="empty-state">
+                <span>📭</span>
+                <p>Nenhum evento cadastrado ainda.</p>
+                <a href="{{ url_for('events.create') }}" class="btn btn-primary">Criar primeiro evento</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Próximos eventos -->
+    <div class="upcoming-events">
+        <h3>Próximos Eventos</h3>
+        {% set upcoming = events | selectattr('date', 'ge', hoje) | list if hoje is defined else events %}
+        {% set future_events = [] %}
+        {% for e in events %}
+            {% if e.date >= hoje %}
+                {% if future_events.append(e) %}{% endif %}
+            {% endif %}
+        {% endfor %}
+        {% if future_events %}
+            {% for e in future_events[:5] %}
+                <div class="upcoming-card">
+                    <span class="upcoming-title">{{ e.title }}</span>
+                    <span class="upcoming-date">{{ e.date.strftime('%d/%m/%Y') }}</span>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-msg">Sem próximos eventos.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TimeCash{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+<div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-icon">⏱💲</span>
+            <span class="logo-text">TIMECA$H</span>
+        </div>
+
+        <div class="sidebar-user">
+            <div class="avatar">{{ current_user.name[0].upper() }}</div>
+            <div class="user-info">
+                <span class="user-name">{{ current_user.name }}</span>
+                <span class="user-email">{{ current_user.email }}</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('calendar.index') }}" class="nav-item {% if request.blueprint == 'calendar' %}active{% endif %}">
+                📅 Calendário
+            </a>
+            <a href="{{ url_for('events.index') }}" class="nav-item {% if request.blueprint == 'events' %}active{% endif %}">
+                🗓 Eventos
+            </a>
+            <a href="{{ url_for('finances.index') }}" class="nav-item {% if request.blueprint == 'finances' %}active{% endif %}">
+                💰 Finanças
+            </a>
+        </nav>
+
+        <a href="{{ url_for('auth.logout') }}" class="logout-btn">🚪 Sair</a>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+</div>
+
+{% else %}
+<div class="auth-wrapper">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages-auth">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    {% block auth_content %}{% endblock %}
+</div>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
