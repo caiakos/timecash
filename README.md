@@ -51,3 +51,49 @@ pip install -r requirements.txt
 ### 4. Configurar variáveis de ambiente
 
 Crie um arquivo `.env` na raiz com:
+
+```
+SECRET_KEY=sua-chave-secreta
+DATABASE_URL=sqlite:///timecash.db
+FLASK_ENV=development
+```
+
+### 5. Rodar o projeto
+
+```bash
+python run.py
+```
+
+Acesse: http://localhost:5000
+
+### 6. Rodar os testes
+
+```bash
+pytest -v
+```
+
+## Estrutura do Projeto
+
+```
+timecash/
+├── app/
+│   ├── __init__.py         # Application Factory (create_app)
+│   ├── models.py           # Modelos: User, Event, Finance
+│   ├── auth/               # Blueprint de autenticação
+│   │   ├── forms.py
+│   │   └── routes.py
+│   ├── events/             # Blueprint de eventos
+│   │   ├── forms.py
+│   │   └── routes.py
+│   ├── finances/           # Blueprint de finanças
+│   │   ├── forms.py
+│   │   └── routes.py
+│   ├── calendar/           # Blueprint do calendário
+│   │   └── routes.py
+│   ├── static/             # CSS e JS
+│   └── templates/          # Templates Jinja2
+├── tests/                  # Testes automatizados (pytest)
+├── run.py                  # Ponto de entrada
+├── .env                    # Variáveis de ambiente (não versionar em produção)
+└── requirements.txt
+```
