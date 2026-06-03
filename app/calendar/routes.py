@@ -31,6 +31,8 @@ def index():
         event_date = e.date
         if isinstance(event_date, str):
             event_date = datetime.strptime(event_date, '%Y-%m-%d').date()
+        elif hasattr(event_date, 'date'):
+            event_date = event_date.date()
         day = event_date.day
         if day not in events_by_day:
             events_by_day[day] = []
@@ -45,7 +47,16 @@ def index():
     ).all()
     total_entradas = sum(f.amount for f in finances if f.type == 'entrada')
     total_saidas = sum(f.amount for f in finances if f.type == 'saida')
-    total_futuros = sum(f.amount for f in finances if f.type == 'saida' and f.date > hoje)
+
+    try:
+        total_futuros = sum(
+            f.amount for f in finances
+            if f.type == 'saida' and (
+                f.date.date() if hasattr(f.date, 'date') else f.date
+            ) > hoje
+        )
+    except Exception:
+        total_futuros = 0.0
 
     return render_template('calendar/index.html',
                            month_calendar=month_calendar,
